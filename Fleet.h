@@ -5,9 +5,9 @@ class Pirate;  // Forward declaration of the Pirate class
 
 class Fleet {
 private:
+    int fleetId;
     int number_of_ships;
     int number_of_pirates;
-    int fleetId;
     Pirate* pointer_to_pirate;
 
 public:
@@ -16,6 +16,8 @@ public:
 
     // Destructor
     ~Fleet();
+
+    bool operator==(const Fleet& other) const;
 
     // Getters
     int getNumberOfShips() const;

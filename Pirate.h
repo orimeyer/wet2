@@ -19,6 +19,8 @@ public:
     // Destructor
     ~Pirate();
 
+    bool operator==(const Pirate& other) const;
+
     // Getters
     int getPirateId() const;
     int getFleetId() const;

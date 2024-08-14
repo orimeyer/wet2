@@ -9,6 +9,10 @@ Pirate::~Pirate() {
     // No dynamic memory to clean up in this simple class
 }
 
+bool Pirate::operator==(const Pirate& other) const {
+    return this->pirateId == other.pirateId;
+}
+
 // Getters
 int Pirate::getPirateId() const {
     return pirateId;

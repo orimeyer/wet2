@@ -15,11 +15,12 @@ private:
     void rehash();
 
 public:
-    HashTable(int initialSize = 16, int loadFactor = 10);
+    HashTable();
     ~HashTable();
 
     int getSize() const;
     int getCount() const;
+    T* getData(int key) const;
 
     void insert(int key, const T& value);
     bool remove(int key);
@@ -27,8 +28,8 @@ public:
 };
 
 template <typename T>
-HashTable<T>::HashTable(int initialSize, int loadFactor)
-    : size(initialSize), count(0), loadFactor(loadFactor) {
+HashTable<T>::HashTable()
+    : size(8), count(0), loadFactor(10) {
     table = new List<T>[size];
 }
 
@@ -76,6 +77,17 @@ bool HashTable<T>::remove(int key) {
 }
 
 template <typename T>
+T* HashTable<T>::getData(int key) const {
+    int index = hashFunction(key);
+    T* result = nullptr;
+    T value;
+    if (table[index].find(value)) {
+        result = &value;
+    }
+    return result;
+}
+
+template <typename T>
 bool HashTable<T>::find(int key, T& value) const {
     int index = hashFunction(key);
     return table[index].find(value);
@@ -85,18 +97,19 @@ template <typename T>
 void HashTable<T>::rehash() {
     int newSize = size * 2;
     List<T>* newTable = new List<T>[newSize];
+    int old_size = size;
+    size = newSize;
 
-    for (int i = 0; i < size; ++i) {
+    for (int i = 0; i < old_size; ++i) {
         while (!table[i].empty()) {
             T value = table[i].removeFront();
-            int newIndex = hashFunction(value.getId()) % newSize;
+            int newIndex = hashFunction(value.getId());
             newTable[newIndex].push_front(value);
         }
     }
 
     delete[] table;
     table = newTable;
-    size = newSize;
 }
 
 #endif // HASHTABLE_H

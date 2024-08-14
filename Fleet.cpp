@@ -9,6 +9,10 @@ Fleet::~Fleet() {
     // No dynamic memory to clean up in this simple class
 }
 
+bool Fleet::operator==(const Fleet& other) const {
+    return this->fleetId == other.fleetId;
+}
+
 // Getters
 int Fleet::getNumberOfShips() const {
     return number_of_ships;
