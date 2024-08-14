@@ -11,15 +11,19 @@ private:
     int count;        // Number of elements in the hash table
     int loadFactor;   // Load factor for rehashing
 
+    int hashFunction(int key) const;
     void rehash();
 
 public:
     HashTable(int initialSize = 16, int loadFactor = 10);
     ~HashTable();
 
-    void insert(const T& key);
-    bool remove(const T& key);
-    bool find(const T& key) const;
+    int getSize() const;
+    int getCount() const;
+
+    void insert(int key, const T& value);
+    bool remove(int key);
+    bool find(int key, T& value) const;
 };
 
 template <typename T>
@@ -34,10 +38,25 @@ HashTable<T>::~HashTable() {
 }
 
 template <typename T>
-void HashTable<T>::insert(const T& key) {
-    int index = key % size;
-    if (!table[index].find(key)) {
-        table[index].push_front(key);
+int HashTable<T>::hashFunction(int key) const {
+    return key % size;
+}
+
+template <typename T>
+int HashTable<T>::getSize() const {
+    return size;
+}
+
+template <typename T>
+int HashTable<T>::getCount() const {
+    return count;
+}
+
+template <typename T>
+void HashTable<T>::insert(int key, const T& value) {
+    int index = hashFunction(key);
+    if (!table[index].find(value)) {
+        table[index].push_front(value);
         count++;
     }
 
@@ -47,8 +66,8 @@ void HashTable<T>::insert(const T& key) {
 }
 
 template <typename T>
-bool HashTable<T>::remove(const T& key) {
-    int index = key % size;
+bool HashTable<T>::remove(int key) {
+    int index = hashFunction(key);
     if (table[index].remove(key)) {
         count--;
         return true;
@@ -57,9 +76,9 @@ bool HashTable<T>::remove(const T& key) {
 }
 
 template <typename T>
-bool HashTable<T>::find(const T& key) const {
-    int index = key % size;
-    return table[index].find(key);
+bool HashTable<T>::find(int key, T& value) const {
+    int index = hashFunction(key);
+    return table[index].find(value);
 }
 
 template <typename T>
@@ -69,9 +88,9 @@ void HashTable<T>::rehash() {
 
     for (int i = 0; i < size; ++i) {
         while (!table[i].empty()) {
-            T key = table[i].removeFront();
-            int newIndex = key % newSize;
-            newTable[newIndex].push_front(key);
+            T value = table[i].removeFront();
+            int newIndex = hashFunction(value.getId()) % newSize;
+            newTable[newIndex].push_front(value);
         }
     }
 
@@ -81,3 +100,4 @@ void HashTable<T>::rehash() {
 }
 
 #endif // HASHTABLE_H
+
