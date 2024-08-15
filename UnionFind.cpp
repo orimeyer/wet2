@@ -7,46 +7,52 @@ void UnionFind::addFleet(int fleetId) {
     fleets.insert(fleetId, fleet);
 }
 
-void UnionFind::addPirate(int pirateId, int money, int rank, int fleetId) {
-    Pirate pirate(pirateId, money, rank);
-    if (fleetId != -1) {
-        pirate.setPointerToFleet(fleets.get(fleetId));
-    }
+void UnionFind::addPirate(int pirateId, int fleetId) {
+    Pirate pirate(pirateId, fleetId);
     pirates.insert(pirateId, pirate);
 }
 
 int UnionFind::findFleet(int pirateId) {
-    Pirate* pirate = pirates.get(pirateId);
-    if (pirate == nullptr) return -1;
-
-    Fleet* fleet = pirate->getPointerToFleet();
-    if (fleet == nullptr) return -1;
-
-    return fleet->getFleetId();
+    Pirate* pirate = pirates.getData(pirateId);
+    return pirate->getPointerToFleet()->getFleetId();
 }
 
 void UnionFind::unionFleets(int pirateId1, int pirateId2) {
     int fleetId1 = findFleet(pirateId1);
     int fleetId2 = findFleet(pirateId2);
 
-    if (fleetId1 == -1 || fleetId2 == -1 || fleetId1 == fleetId2) return;
+    Fleet* fleet1 = fleets.getData(fleetId1);
+    Fleet* fleet2 = fleets.getData(fleetId2);
 
-    // Merge fleets by linking all pirates of fleetId2 to fleetId1
-    Fleet* fleet1 = fleets.get(fleetId1);
-    Fleet* fleet2 = fleets.get(fleetId2);
+    Pirate* main_pirate_fleet1 = fleet1->getPointerToPirate();
+    Pirate* main_pirate_fleet2 = fleet2->getPointerToPirate();
 
-    if (fleet1 == nullptr || fleet2 == nullptr) return;
-
-    // Update fleet pointers for all pirates in fleet2
-    for (int i = 0; i < fleet2->getNumberOfPirates(); i++) {
-        Pirate* pirate = pirates.get(fleet2->getPirateId(i));
-        if (pirate != nullptr) {
-            pirate->setPointerToFleet(fleet1);
-        }
+    if (fleet1->getNumberOfPirates() >= fleet2->getNumberOfPirates()){
+        
+        main_pirate_fleet2->setPointerToPirate(main_pirate_fleet1);
+        main_pirate_fleet2->setRank(main_pirate_fleet2->getRank() + fleet1->getNumberOfPirates() - main_pirate_fleet1->getRank());
+        fleet1->setNumberOfShips(fleet1->getNumberOfShips() + fleet2->getNumberOfShips());
+        fleet1->setNumberOfPirates(fleet1->getNumberOfPirates() + fleet2->getNumberOfPirates());
+        fleets.remove(fleetId2);
     }
 
-    fleet1->setNumberOfShips(fleet1->getNumberOfShips() + fleet2->getNumberOfShips());
-    fleet1->setNumberOfPirates(fleet1->getNumberOfPirates() + fleet2->getNumberOfPirates());
-
-    fleets.remove(fleetId2);
+    if (fleet1->getNumberOfPirates() < fleet2->getNumberOfPirates()){
+        main_pirate_fleet1->setPointerToPirate(main_pirate_fleet2);
+        main_pirate_fleet1->setRank(main_pirate_fleet1->getRank() + fleet2->getNumberOfPirates() - main_pirate_fleet2->getRank());
+        fleet2->setNumberOfShips(fleet1->getNumberOfShips() + fleet2->getNumberOfShips());
+        fleet2->setNumberOfPirates(fleet1->getNumberOfPirates() + fleet2->getNumberOfPirates());
+        fleets.remove(fleetId1);
+    }
 }
+
+int UnionFind::calcRank(int pirateId)
+{
+    Pirate* selected_pirate = pirates.getData(pirateId);
+    int sum = 0;
+    while(selected_pirate->getPointerToPirate() != nullptr){
+        sum += selected_pirate->getRank();
+        selected_pirate = selected_pirate->getPointerToPirate();
+    }
+    return sum;
+}
+

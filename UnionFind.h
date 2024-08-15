@@ -14,10 +14,12 @@ public:
     UnionFind();
 
     void addFleet(int fleetId);
-    void addPirate(int pirateId, int money, int rank, int fleetId = -1);
+    void addPirate(int pirateId, int fleetId);
 
     int findFleet(int pirateId);
     void unionFleets(int pirateId1, int pirateId2);
+
+    int calcRank(int pirateId);
 };
 
 #endif // UNIONFIND_H
